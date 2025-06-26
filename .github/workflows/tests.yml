@@ -69,27 +69,17 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
+        skip-install-dependencies: "true"
+        container-network-name: ""
+        install-microceph-parameter: "install_microceph"
+        bootstrap-parameters: ""
+        setup-cluster-parameters: ""
 
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install and setup
+    - name: Verify metadata
       run: |
-        ~/actionutils.sh install_microceph
-
         set -uex
         # Verify metadata.yaml
         meta=/var/snap/microceph/current/conf/metadata.yaml
@@ -254,40 +244,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create containers with loopback devices
-      run: ~/actionutils.sh create_containers public
-
-    - name: Install local microceph snap
-      run: ~/actionutils.sh install_multinode
-
-    - name: Bootstrap
-      run: ~/actionutils.sh bootstrap_head public
-
-    - name: Setup cluster
-      run: ~/actionutils.sh cluster_nodes public
+        bootstrap-parameters: bootstrap_head public
+        setup-cluster-parameters: cluster_nodes public
 
     - name: Verify config
       run: ~/actionutils.sh test_ceph_conf
@@ -383,46 +344,13 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create containers with loopback devices
-      run: ~/actionutils.sh create_containers internal
-
-    - name: Install local microceph snap
-      run: ~/actionutils.sh install_multinode
-
-    - name: Bootstrap
-      run: ~/actionutils.sh bootstrap_head internal
-
-    - name: Setup cluster
-      run: ~/actionutils.sh cluster_nodes internal
-
-    - name: Add 3 OSDs
-      run: |
-        for c in node-wrk0 node-wrk1 node-wrk2 ; do
-          ~/actionutils.sh add_osd_to_node $c
-        done
+        container-scope: internal
+        bootstrap-parameters: bootstrap_head internal
+        setup-cluster-parameters: cluster_nodes internal
+        osd-count: 3
 
     - name: Test 3 osds present
       run: |
@@ -440,40 +368,12 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create 4 containers with loopback devices
-      run: ~/actionutils.sh create_containers internal
-
-    - name: Install local microceph snap
-      run: ~/actionutils.sh install_multinode
-
-    - name: Bootstrap
-      run: ~/actionutils.sh bootstrap_head internal
-
-    - name: Setup cluster
-      run: ~/actionutils.sh cluster_nodes internal
+        container-scope: internal
+        bootstrap-parameters: bootstrap_head internal
+        setup-cluster-parameters: cluster_nodes internal
 
     - name: Enable one extra ceph mon for redundancy
       run: ~/actionutils.sh nodeexec node-wrk3 enable_mon
@@ -526,28 +426,13 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install and setup
-      run: ~/actionutils.sh install_microceph
+        container-network-name: ""
+        install-microceph-parameter: "install_microceph"
+        bootstrap-parameters: ""
+        setup-cluster-parameters: ""
 
     - name: Add loopback file OSDs
       run: |
@@ -579,28 +464,13 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install and setup
-      run: ~/actionutils.sh install_microceph
+        container-network-name: ""
+        install-microceph-parameter: "install_microceph"
+        bootstrap-parameters: ""
+        setup-cluster-parameters: ""
 
     - name: Add loopback file OSDs
       run: |
@@ -645,47 +515,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create containers with loopback devices
-      run: ~/actionutils.sh create_containers public
-
-    - name: Install quincy stable from store
-      run: ~/actionutils.sh install_store quincy/stable
-
-    - name: Bootstrap
-      run: ~/actionutils.sh bootstrap_head
-
-    - name: Setup cluster
-      run: ~/actionutils.sh cluster_nodes
-
-    - name: Add 3 OSDs
-      run: |
-        for c in node-wrk0 node-wrk1 node-wrk2 ; do
-          ~/actionutils.sh add_osd_to_node $c
-        done
-        ~/actionutils.sh headexec wait_for_osds 3
+        ceph-release: "quincy/stable"
+        osd-count: 3
 
     - name: Enable RGW
       run: ~/actionutils.sh headexec enable_rgw
@@ -716,47 +550,12 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create containers with loopback devices
-      run: ~/actionutils.sh create_containers public
-
-    - name: Install reef stable from store
-      run: ~/actionutils.sh install_store reef/stable
-
-    - name: Bootstrap
-      run: ~/actionutils.sh bootstrap_head
-
-    - name: Setup cluster
-      run: ~/actionutils.sh cluster_nodes
-
-    - name: Add 3 OSDs
-      run: |
-        for c in node-wrk0 node-wrk1 node-wrk2 ; do
-          ~/actionutils.sh add_osd_to_node $c
-        done
-        ~/actionutils.sh headexec wait_for_osds 3
+        install-microceph-parameter: ""
+        ceph-release: "reef/stable"
+        osd-count: 3
 
     - name: Enable RGW
       run: ~/actionutils.sh headexec enable_rgw
@@ -790,28 +589,14 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install and setup
-      run: ~/actionutils.sh install_microceph
+        skip-install-dependencies: true
+        container-network-name: ""
+        install-microceph-parameter: "install_microceph"
+        bootstrap-parameters: ""
+        setup-cluster-parameters: ""
 
     - name: Add loopback file OSDs
       run: |
@@ -837,37 +622,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
+    - name: MicroCeph test common setup
+      uses: ./.github/actions/test-setup
       with:
-        name: snaps
-        path: /home/runner
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create containers with loopback devices
-      run: ~/actionutils.sh create_containers public
-
-    - name: Install local microceph snap
-      run: ~/actionutils.sh install_multinode
-
-    - name: Bootstrap
-      run: ~/actionutils.sh remote_simple_bootstrap_two_sites
+        bootstrap-parameters: "remote_simple_bootstrap_two_sites"
+        setup-cluster-parameters: ""
 
     - name: Exchange Cluster tokens
       run: ~/actionutils.sh remote_exchange_site_tokens
