@@ -69,6 +69,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -244,6 +249,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -344,6 +354,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -368,6 +383,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -426,6 +446,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -464,6 +489,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -515,6 +545,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -550,6 +585,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -589,6 +629,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
@@ -622,6 +667,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: MicroCeph test common setup
       uses: ./.github/actions/test-setup
       with:
