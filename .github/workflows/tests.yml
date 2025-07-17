@@ -934,6 +934,9 @@ jobs:
         ~/actionutils.sh wait_for_osds 3
         sudo microceph.ceph -s
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+
     - name: Enable NFS
       run: ~/actionutils.sh enable_nfs foo
 
