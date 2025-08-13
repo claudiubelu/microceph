@@ -1,36 +1,32 @@
-name: MicroCeph Test Common Setup
-description: Common setup steps for MicroCeph testing
+name: MicroCeph Test Multi Node Setup
+description: Common setup steps for MicroCeph multi node testing
 
 inputs:
-  skip-install-dependencies:
-    description: Skip the installation of dependencies.
-    required: false
-    default: "false"
-
   container-network-name:
-    description: Container network name for create_containers. Skipped if empty.
+    description: Container network name for create_containers.
     required: false
     default: "public"
 
-  install-microceph-parameter:
-    description: Parameter to be used for the "Install microceph" step. Skipped if empty.
-    required: false
-    default: "install_multinode"
-
   ceph-release:
-    description: Ceph release to be installed from the store. Skipped if empty.
+    description: |
+      Ceph release to be installed from the store. If empty, the local
+      microceph snap will be installed instead.
     required: false
     default: ""
 
   bootstrap-parameters:
-    description: Space-separated parameters to be used for the "Bootstrap" step. Skipped if empty.
+    description: |
+      Space-separated parameters to be used for the "Bootstrap" step.
+      Skipped if empty.
     required: false
-    default: "bootstrap_head"
+    default: bootstrap_head public
 
   setup-cluster-parameters:
-    description: Space-separated parameters to be used for the "Setup cluster" step. Skipped if empty.
+    description: |
+      Space-separated parameters to be used for the "Setup cluster" step.
+      Skipped if empty.
     required: false
-    default: "cluster_nodes"
+    default: cluster_nodes public
 
   osd-count:
     description: Number of OSDs to add. Skipped if 0.
@@ -59,34 +55,32 @@ runs:
       run: ~/actionutils.sh free_runner_disk
 
     - name: Install dependencies
-      if: ${{ inputs.skip-install-dependencies != "true" }}
       shell: bash
       run: ~/actionutils.sh setup_lxd
 
     - name: Create containers with loopback devices
-      if: ${{ inputs.container-network-name != "" }}
       shell: bash
       run: ~/actionutils.sh create_containers ${{ inputs.container-network-name }}
 
-    - name: Install local microceph snap
-      if: ${{ inputs.install-microceph-parameter != "" }}
-      shell: bash
-      run: ~/actionutils.sh ${{ inputs.install-microceph-parameter }}
-
     - name: Install ceph release from store
-      if: ${{ inputs.ceph-release != "" }}
+      if: "${{ inputs.ceph-release != '' }}"
       shell: bash
       run: ~/actionutils.sh install_store ${{ inputs.ceph-release }}
 
+    - name: Install local microceph snap
+      if: "${{ inputs.ceph-release == '' }}"
+      shell: bash
+      run: ~/actionutils.sh install_multinode
+
     - name: Bootstrap
-      if: ${{ inputs.bootstrap-cluster-parameters != "" }}
+      if: "${{ inputs.bootstrap-parameters != '' }}"
       shell: bash
       run: ~/actionutils.sh ${{ inputs.bootstrap-parameters }}
 
     - name: Setup cluster
-      if: ${{ inputs.setup-cluster-parameters != "" }}
+      if: "${{ inputs.setup-cluster-parameters != '' }}"
       shell: bash
-      run: ~/actionutils.sh ${{ inputs.setup-cluster-parameters }}
+      run: ~/actionutils.sh cluster_nodes ${{ inputs.setup-cluster-parameters }}
 
     - name: Add and wait for OSDs
       if: ${{ inputs.osd-count != 0 }}
@@ -96,4 +90,7 @@ runs:
         for i in $(seq 0 $[${{ inputs.osd-count }} - 1]) ; do
           ~/actionutils.sh add_osd_to_node "node-wrk$i"
         done
+
         ~/actionutils.sh headexec wait_for_osds ${{ inputs.osd-count }}
+
+        lxc exec node-wrk0 -- sh -c "microceph.ceph -s"

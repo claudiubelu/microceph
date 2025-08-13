@@ -74,14 +74,8 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
-      with:
-        skip-install-dependencies: "true"
-        container-network-name: ""
-        install-microceph-parameter: "install_microceph"
-        bootstrap-parameters: ""
-        setup-cluster-parameters: ""
+    - name: MicroCeph test common single node setup
+      uses: ./.github/actions/test-single-node-setup
 
     - name: Verify metadata
       run: |
@@ -277,11 +271,8 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
-      with:
-        bootstrap-parameters: bootstrap_head public
-        setup-cluster-parameters: cluster_nodes public
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
 
     - name: Verify config
       run: ~/actionutils.sh test_ceph_conf
@@ -382,10 +373,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
       with:
-        container-scope: internal
+        container-network-name: internal
         bootstrap-parameters: bootstrap_head internal
         setup-cluster-parameters: cluster_nodes internal
         osd-count: 3
@@ -411,20 +402,13 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
       with:
-        container-scope: internal
+        container-network-name: internal
         bootstrap-parameters: bootstrap_head internal
         setup-cluster-parameters: cluster_nodes internal
-
-    - name: Add and wait for OSDs
-      run: |
-        set -uex
-        for i in 0 1 2 3 ; do
-          ~/actionutils.sh add_osd_to_node "node-wrk$i"
-        done
-        ~/actionutils.sh headexec wait_for_osds 4
+        osd-count: 4
 
     - name: Wait for ceph cluster to settle
       run: |
@@ -488,20 +472,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
+    - name: MicroCeph test common single node setup
+      uses: ./.github/actions/test-single-node-setup
       with:
-        container-network-name: ""
-        install-microceph-parameter: "install_microceph"
-        bootstrap-parameters: ""
-        setup-cluster-parameters: ""
-
-    - name: Add loopback file OSDs
-      run: |
-        set -uex
-        sudo microceph disk add loop,1G,4
-        ~/actionutils.sh wait_for_osds 4
-        sudo microceph.ceph -s
+        osd-count: 4
 
     - name: Enable RGW
       run: ~/actionutils.sh enable_rgw
@@ -531,20 +505,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
+    - name: MicroCeph test common single node setup
+      uses: ./.github/actions/test-single-node-setup
       with:
-        container-network-name: ""
-        install-microceph-parameter: "install_microceph"
-        bootstrap-parameters: ""
-        setup-cluster-parameters: ""
-
-    - name: Add loopback file OSDs
-      run: |
-        set -uex
-        sudo microceph disk add loop,1G,3
-        ~/actionutils.sh wait_for_osds 3
-        sudo microceph.ceph -s
+        osd-count: 3
 
     - name: Add WAL/DB enabled OSD
       run: |
@@ -587,10 +551,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
       with:
         ceph-release: "quincy/stable"
+        bootstrap-parameters: "bootstrap_head"
         osd-count: 3
 
     - name: Enable RGW
@@ -627,11 +592,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
       with:
-        install-microceph-parameter: ""
         ceph-release: "reef/stable"
+        bootstrap-parameters: "bootstrap_head"
         osd-count: 3
 
     - name: Enable RGW
@@ -671,21 +636,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
+    - name: MicroCeph test common single node setup
+      uses: ./.github/actions/test-single-node-setup
       with:
-        skip-install-dependencies: true
-        container-network-name: ""
-        install-microceph-parameter: "install_microceph"
-        bootstrap-parameters: ""
-        setup-cluster-parameters: ""
-
-    - name: Add loopback file OSDs
-      run: |
-        set -uex
-        sudo microceph disk add loop,1G,3
-        ~/actionutils.sh wait_for_osds 3
-        sudo microceph.ceph -s
+        osd-count: 3
 
     - name: Enable RGW
       run: ~/actionutils.sh enable_rgw
@@ -709,8 +663,8 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: MicroCeph test common setup
-      uses: ./.github/actions/test-setup
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
       with:
         bootstrap-parameters: "remote_simple_bootstrap_two_sites"
         setup-cluster-parameters: ""
@@ -750,35 +704,16 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
-      with:
-        name: snaps
-        path: /home/runner
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
 
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create containers with loopback devices
-      run: ~/actionutils.sh create_containers public
-
-    - name: Install local microceph snap
-      run: ~/actionutils.sh install_multinode
-
-    - name: Bootstrap
-      run: ~/actionutils.sh remote_simple_bootstrap_two_sites
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
+      with:
+        bootstrap-parameters: "remote_simple_bootstrap_two_sites"
+        setup-cluster-parameters: ""
 
     - name: Exchange Cluster tokens
       run: ~/actionutils.sh remote_exchange_site_tokens
@@ -809,35 +744,15 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
-      with:
-        name: snaps
-        path: /home/runner
-
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install and setup
-      run: ~/actionutils.sh install_microceph
-
-    - name: Add loopback file OSDs
-      run: |
-        set -uex
-        sudo microceph disk add loop,1G,3
-        ~/actionutils.sh wait_for_osds 3
-        sudo microceph.ceph -s
+    - name: MicroCeph test common single node setup
+      uses: ./.github/actions/test-single-node-setup
+      with:
+        osd-count: 3
 
     - name: Enable NFS
       run: ~/actionutils.sh enable_nfs foo
@@ -874,46 +789,15 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
-      with:
-        name: snaps
-        path: /home/runner
-
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create containers with loopback devices
-      run: ~/actionutils.sh create_containers public
-
-    - name: Install local microceph snap
-      run: ~/actionutils.sh install_multinode
-
-    - name: Bootstrap
-      run: ~/actionutils.sh bootstrap_head public
-
-    - name: Setup cluster
-      run: ~/actionutils.sh cluster_nodes public
-
-    - name: Add 3 OSDs
-      run: |
-        for c in node-wrk0 node-wrk1 node-wrk2 ; do
-          ~/actionutils.sh add_osd_to_node $c
-        done
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
+      with:
+        osd-count: 3
 
     - name: Enable NFS
       run: ~/actionutils.sh enable_nfs_in_nodes foo node-wrk0 node-wrk1 node-wrk2
@@ -948,37 +832,16 @@ jobs:
     runs-on: ubuntu-22.04
     needs: build-microceph
     steps:
-    - name: Download snap
-      uses: actions/download-artifact@v4
-      with:
-        name: snaps
-        path: /home/runner
-
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Copy utils
-      run: cp tests/scripts/actionutils.sh $HOME
-
-    - name: Clear FORWARD firewall rules
-      run: ~/actionutils.sh cleaript
-
-    - name: Free disk
-      run: ~/actionutils.sh free_runner_disk
-
-    - name: Install dependencies
-      run: ~/actionutils.sh setup_lxd
-
-    - name: Create containers with loopback devices
-      run: ~/actionutils.sh create_containers public
-
-    - name: Install local microceph snap
-      run: ~/actionutils.sh install_multinode
-
-    - name: Bootstrap
-      run: ~/actionutils.sh bootstrap_head public --v2-only
+    - name: MicroCeph test common multi node setup
+      uses: ./.github/actions/test-multi-node-setup
+      with:
+        bootstrap-parameters: bootstrap_head public --v2-only
+        setup-cluster-parameters: ""
 
     - name: Verify messenger v2 on head node
       run: ~/actionutils.sh test_v2_single_node
